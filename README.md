@@ -4,9 +4,13 @@
 
 A mobile web app that runs the daily operations of a one-person food business (orders, billing, payments, stock and customers) without asking anyone to change how they already work.
 
-### 🔗 [**Try the live app → ordersin.co**](https://ordersin.co)
+### 🔗 [**Try the live app → ordersin.co/app**](https://ordersin.co/app)
+
+**Product site:** [ordersin.co](https://ordersin.co)
 
 > **This is a live product in supervised beta, used by a real home kitchen taking real customer orders.** It is not a demo, a tutorial project, or a portfolio exercise built to be looked at.
+>
+> Sign-in is by phone number and SMS OTP, with no guest mode, because the data behind it belongs to a real business. Ask me and I will set up a login.
 
 ---
 
@@ -222,6 +226,7 @@ Every screenshot is from the live application running on a real phone with real 
 ---
 
 <div align="center">
-<h3><a href="https://ordersin.co">Try the live app &rarr;</a></h3>
+<h3><a href="https://ordersin.co/app">Try the live app &rarr;</a></h3>
+<p><a href="https://ordersin.co">Product site</a></p>
 <p>Built and directed by <b>Nitin Rawal</b></p>
 </div>
