@@ -118,7 +118,7 @@ Three views over the same data: where orders come from, what they earn, and wher
 </tr>
 </table>
 
-The **revenue-by-source** chart is the product thesis proving itself: for this kitchen, **100% of revenue arrives through WhatsApp.** That is precisely why the app is built around WhatsApp instead of trying to move anyone off it.
+The **revenue-by-source** chart is the product thesis proving itself: for the beta kitchen, **100% of revenue arrives through WhatsApp.** That is precisely why the app is built around WhatsApp instead of trying to move anyone off it.
 
 ---
 
@@ -127,7 +127,7 @@ The **revenue-by-source** chart is the product thesis proving itself: for this k
 <table>
 <tr>
 <td width="57%" valign="top">
-<p>A <b>rules-based insights engine</b> (14 rules over the kitchen's own live order, stock, payment and menu data) that surfaces what needs attention today, ranked by urgency, each with an action attached.</p>
+<p>A <b>rules-based insights engine</b> (8 checks over the kitchen's own live order, stock, payment and menu data) that surfaces what needs attention today, ranked by urgency, each with an action attached. Each card opens to show the detail and the action, so a busy morning reads as a short list rather than a wall of text.</p>
 <p>It catches things like: ingredients about to run out before they break an order, an order that has been preparing too long (with a ready-to-send apology message for WhatsApp), unpaid orders piling up, and which dish is actually carrying the week.</p>
 <p>The logic is <b>deterministic and auditable</b>: no model calls, no inference costs, no unpredictable output. Every insight is explainable, arrives in the owner's chosen language, and deep-links to the screen where it can be acted on.</p>
 </td>
@@ -151,11 +151,38 @@ The **revenue-by-source** chart is the product thesis proving itself: for this k
 
 **Menu** holds each dish with its price, photo, availability and cost-to-make. **Stock** tracks ingredients with per-item reorder thresholds, depleting automatically as orders go out.
 
+**Customers** keeps every customer's address, order history and dues in one place, built up automatically as orders come in.
+
+<table>
+<tr>
+<td align="center"><img src="screenshots/customers.png" width="240" alt="Customer list with address and order history" /><br/><sub><b>Customers</b></sub></td>
+<td align="center"><img src="screenshots/reports-export.png" width="240" alt="Download reports as CSV or Excel" /><br/><sub><b>Reports</b></sub></td>
+</tr>
+</table>
+
 **Import** is the onboarding answer to "I already have months of history." A kitchen can upload a spreadsheet, or **export its WhatsApp group chat and have the app parse the messages into structured orders and customers.** Meeting the business where its data already lives is the difference between a tool someone tries and a tool someone adopts.
 
-<img src="screenshots/reports-export.png" width="270" alt="Download reports as CSV or Excel" />
-
 **Reports** export orders, expenses and customers to CSV or Excel. The owner's data stays the owner's, including the ability to take it and leave.
+
+---
+
+## In testing: orders straight from WhatsApp
+
+Today the owner copies an order out of WhatsApp and pastes it in. The next step removes the copy-paste: a message sent to the kitchen's WhatsApp Business number arrives in the app already read.
+
+<table>
+<tr>
+<td align="center"><img src="screenshots/whatsapp-orders-to-review.png" width="240" alt="WhatsApp orders waiting for review on the Orders screen" /><br/><sub><b>Waiting for review</b></sub></td>
+<td align="center"><img src="screenshots/whatsapp-draft-order.png" width="240" alt="New Order form filled in from a WhatsApp message" /><br/><sub><b>Filled in, ready to check</b></sub></td>
+</tr>
+</table>
+
+- The **WhatsApp Cloud API** delivers each message to a Cloud Function, which accepts it only with a valid Meta signature.
+- **Claude** (Anthropic's model) reads the message against the kitchen's own menu: dishes and quantities, cooking notes like "less spicy", an address like "C-1203" split into tower, floor and flat, and a delivery time. Anything not on the menu is flagged, never guessed.
+- The owner taps **Review**, sees the original message above the filled-in order, and taps **Place Order**. **Nothing is ever placed automatically**, so a misread message costs a correction, not a wrong delivery.
+- The model's answer is never trusted blindly: menu items are checked against the real menu server-side, quantities are clamped, and AI reads are capped per kitchen per day so a flood of messages cannot run up a bill.
+
+**Status:** built, deployed and tested end to end against a local copy of the database; waiting on WhatsApp Business account setup before it takes real messages.
 
 ---
 
@@ -172,14 +199,17 @@ Every item below is verified against the codebase.
 | **Serverless** | Netlify Functions: transactional email |
 | **File storage** | Firebase Storage: kitchen branding and dish photos |
 | **Voice** | Google Cloud Text-to-Speech: WaveNet, locale-matched |
+| **AI (in testing)** | Anthropic Claude API, server-side only, structured output |
+| **Messaging (in testing)** | WhatsApp Cloud API webhook |
 | **Charts** | Recharts |
 | **Data import/export** | PapaParse (CSV) · SheetJS (Excel) · JSZip (WhatsApp chat exports) |
 | **Payments** | UPI deep links + generated QR codes |
 | **Hosting** | Netlify: SPA routing, cache and security headers |
 | **App shell** | Installable Progressive Web App |
 | **Internationalisation** | English · Hindi · Kannada, with an automated coverage audit |
+| **CI/CD** | GitHub Actions: visual regression across 72 screens, automated Cloud Functions deploys |
 
-**Scale:** ~190 TypeScript/TSX files · ~44,000 lines · 40 screens · 4 Cloud Functions · ~270 commits.
+**Scale:** ~210 TypeScript/TSX files · ~47,000 lines · 42 screens · 10 Cloud Functions · ~425 commits.
 
 ---
 
@@ -193,6 +223,8 @@ Every item below is verified against the codebase.
 
 **Security was reviewed before real customers were let in.** A phased pre-launch audit ran before the ordering link went out. It found and fixed two real vulnerabilities in the transactional email function: an **open relay** (any unauthenticated caller could send mail from a trusted domain to any recipient) and an **HTML/header injection** hole (user-supplied names were interpolated raw into the message body and subject line).
 
+**Every change is screenshot-tested before it ships.** Each pull request rebuilds the app against the Firebase emulators with a fixed demo kitchen and a frozen clock, captures 72 screens, and reports exactly which ones changed, pixel for pixel. Backend changes deploy themselves from the main branch through a service account, and a deploy refuses to delete a live function that has gone missing from the code rather than removing it silently.
+
 **Known limitations are written down, not hidden.** The private repository documents what does not work and why, including a multi-month iOS PWA viewport bug, the nine mitigation attempts that failed, and the reasoning for parking it rather than shipping a fragile patch.
 
 ---
@@ -202,7 +234,7 @@ Every item below is verified against the codebase.
 I am not a professional developer. I built OrdersIn by **directing and managing an AI-assisted development process**, and that process is the skill this project demonstrates.
 
 - **Defined all product requirements**: who this is for, what belongs on which screen, what a one-person business needs to see first thing in the morning, and what to deliberately leave out. The positioning, the WhatsApp-first strategy, and the decision to serve businesses avoiding the aggregators are mine.
-- **Directed the full build across ~270 commits**: specifying each feature, reviewing what came back, and holding the architectural decisions: server-authoritative security rules over client-side trust, Cloud Functions for every public write, a PWA over a native app, three languages from the start rather than "later".
+- **Directed the full build across ~425 commits**: specifying each feature, reviewing what came back, and holding the architectural decisions: server-authoritative security rules over client-side trust, Cloud Functions for every public write, a PWA over a native app, three languages from the start rather than "later".
 - **Ran the testing and debugging cycles personally**: on real iOS and Android devices, reproducing failures, driving each to a fix and re-testing. I refused work that arrived with "couldn't build or lint" caveats attached.
 - **Owned security**: commissioned the phased pre-launch audit, then deployed the resulting hardened Firestore and Storage rules and Cloud Functions myself.
 - **Run it as a live product**: Firebase project, Netlify deployments, environment configuration, onboarding a real home kitchen, and supporting it while it takes real orders from real customers.
@@ -221,7 +253,9 @@ The claim here is not that I hand-wrote the TypeScript. It is product judgment, 
 
 ## Notes on these screenshots
 
-Every screenshot is from the live application running on a real phone with real data. Customer names, phone numbers, addresses, the kitchen's identity and all payment details have been **redacted to protect the privacy of real people**. The kitchen featured has given permission to be shown. Nothing has been mocked up or recreated for presentation.
+Most screenshots are of the current production build, captured automatically against a **demo kitchen with fictional data** ("Annapurna Home Kitchen", made-up customers and placeholder phone numbers), so nothing needs blurring. They show the real app exactly as it renders; only the data is invented.
+
+Two are from the live beta kitchen, taken on a real phone with its permission: the **customer storefront** and the **menu**, because the demo kitchen has no dish photos. Names, the kitchen's identity and payment details in those two are **redacted to protect the privacy of real people**.
 
 ---
 
