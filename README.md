@@ -255,7 +255,7 @@ The claim here is not that I hand-wrote the TypeScript. It is product judgment, 
 
 Most screenshots are of the current production build, captured automatically against a **demo kitchen with fictional data** ("Annapurna Home Kitchen", made-up customers and placeholder phone numbers), so nothing needs blurring. They show the real app exactly as it renders; only the data is invented.
 
-Two are from the live beta kitchen, taken on a real phone with its permission: the **customer storefront** and the **menu**, because the demo kitchen has no dish photos. Names, the kitchen's identity and payment details in those two are **redacted to protect the privacy of real people**.
+The **menu** is from the live beta kitchen, taken on a real phone with its permission, because the demo kitchen has no dish photos. Names, the kitchen's identity and payment details in it are **redacted to protect the privacy of real people**. The **customer storefront** is the current build running against the demo kitchen, with a few dish photos borrowed from the live kitchen.
 
 ---
 
