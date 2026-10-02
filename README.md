@@ -143,7 +143,7 @@ The **revenue-by-source** chart is the product thesis proving itself: for the be
 
 <table>
 <tr>
-<td align="center"><img src="screenshots/menu-catalogue.png" width="240" alt="Menu with 63 dishes across 7 categories" /><br/><sub><b>Menu · 63 dishes, 7 categories</b></sub></td>
+<td align="center"><img src="screenshots/menu-catalogue.png" width="240" alt="Menu with 70 dishes across 7 categories" /><br/><sub><b>Menu · 70 dishes, 7 categories</b></sub></td>
 <td align="center"><img src="screenshots/stock-inventory.png" width="240" alt="Stock levels with low and out of stock alerts" /><br/><sub><b>Ingredient stock</b></sub></td>
 <td align="center"><img src="screenshots/import-whatsapp-chat.png" width="240" alt="Import data from Excel, CSV or a WhatsApp chat export" /><br/><sub><b>Import</b></sub></td>
 </tr>
@@ -182,7 +182,7 @@ Today the owner copies an order out of WhatsApp and pastes it in. The next step 
 - The owner taps **Review**, sees the original message above the filled-in order, and taps **Place Order**. **Nothing is ever placed automatically**, so a misread message costs a correction, not a wrong delivery.
 - The model's answer is never trusted blindly: menu items are checked against the real menu server-side, quantities are clamped, and AI reads are capped per kitchen per day so a flood of messages cannot run up a bill.
 
-**Status:** built, deployed and tested end to end against a local copy of the database; waiting on WhatsApp Business account setup before it takes real messages.
+**Status:** the app side (the review list, the filled-in order, placing it) is built and tested; the WhatsApp connection and the AI reading are deployed but have not yet processed a real message, pending WhatsApp Business account setup. The two screenshots use demo messages.
 
 ---
 
