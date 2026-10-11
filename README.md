@@ -4,13 +4,15 @@
 
 A mobile web app that runs the daily operations of a one-person food business (orders, billing, payments, stock and customers) without asking anyone to change how they already work.
 
-### 🔗 [**Try the live app → ordersin.co/app**](https://ordersin.co/app)
+### 🔗 [**Open the live app → ordersin.co/app**](https://ordersin.co/app) · *invite-only beta*
 
 **Product site:** [ordersin.co](https://ordersin.co)
 
 > **This is a live product in supervised beta, used by a real home kitchen taking real customer orders.** It is not a demo, a tutorial project, or a portfolio exercise built to be looked at.
 >
-> Sign-in is by phone number and SMS OTP, with no guest mode, because the data behind it belongs to a real business. Ask me and I will set up a login.
+> So there is no guest mode. Sign-in is phone number + SMS OTP, followed by an **invite code**, and the gate is enforced in the Firestore security rules rather than in the UI — it holds against someone reading the bundle, not just someone using the app.
+>
+> **The link is safe to click.** Signing in without a code gets you an account and nothing else: you reach the invite screen and stop there, with no access to any kitchen's data. Two practical notes — SMS is restricted to Indian (+91) numbers, so a non-Indian number will not receive an OTP, and the screenshots below show the whole product from the inside if you would rather not sign in at all. Ask me and I will set up a real login.
 
 ---
 
@@ -194,7 +196,7 @@ Every item below is verified against the codebase.
 |---|---|
 | **Frontend** | React 19 · TypeScript · Vite · Tailwind CSS 4 · React Router 6 |
 | **Authentication** | Firebase Auth: phone number + SMS OTP (no passwords) |
-| **Database** | Cloud Firestore, with server-authoritative Security Rules |
+| **Database** | Cloud Firestore (`asia-south1`), with server-authoritative Security Rules |
 | **Backend** | Firebase Cloud Functions (TypeScript, `asia-south1`) |
 | **Serverless** | Netlify Functions: transactional email |
 | **File storage** | Firebase Storage: kitchen branding and dish photos |
@@ -217,7 +219,9 @@ Every item below is verified against the codebase.
 
 **Public writes are server-only.** The customer storefront and feedback pages are unauthenticated. Rather than letting an unauthenticated browser write to the database, every public write goes through a Cloud Function using the Admin SDK: `placeOrder` and `submitFeedback`. The Firestore rules deny public writes outright, so a crafted request cannot forge an order, tamper with the order counter, or reach another kitchen's data.
 
-**Default deny, then grant narrowly.** The security rules open with a blanket `allow read, write: if false` and grant access from there. Subscription and billing-tier documents are server-only, so a client cannot promote itself to a paid plan. Customer PII is deliberately not listable: single-document reads are permitted where a page genuinely needs one, but nothing can enumerate the customer table.
+**Deny by default, and `get` is not `read`.** Firestore denies everything unless a rule allows it, and `allow` rules combine with OR — so the blanket `allow read, write: if false` at the top of the rules states intent rather than enforcing anything; nothing after it can be overridden by it. The work is in granting narrowly. Subscription and billing-tier documents are server-only, so a client cannot promote itself to a paid plan. Customer PII is deliberately not listable, and that rests on using `get` rather than `read`: in Firestore `read` means *get + list*, so any condition that does not inspect document data would hand a signed-in user the entire collection. Single-document reads are permitted where a page genuinely needs one; nothing can enumerate the customer table.
+
+**Invite-gated signup, enforced where it cannot be bypassed.** Phone auth is open by default: anyone who can receive an SMS can create an account, and their data would then live in — and be billed to — this Firebase project. Access is gated on an invite code, and the gate lives in the security rules, not the UI, because a UI gate is bypassed by anyone who reads the bundle and writes to the database directly. Claiming a code is two sequential writes, each independently rules-checked: taking the code requires its pre-write `claimedBy` to be `null`, which is what makes two people racing for the same code resolve to exactly one winner; creating the claim document then requires that code to *already* name the caller as its claimer. The two cannot be reordered, and a batch would not work — rules evaluate every write in a batch against pre-batch state.
 
 **Voice that doesn't sound like a robot.** The device's default voice reads Indian names and dish names badly. `synthesizeSpeech` calls Google Cloud TTS with locale-matched WaveNet voices (`en-IN`, `hi-IN`, `kn-IN`) deployed to `asia-south1` for a short round trip from India. WaveNet bills per character, so the function is defended on four sides (App Check, an authentication gate, a plan check and a per-request character cap), and the plan check **fails closed**: if the database hiccups, voice is denied rather than given away. When the callable is unavailable the client falls back to browser speech synthesis, so the feature degrades instead of breaking.
 
@@ -260,7 +264,8 @@ The **menu** is from the live beta kitchen, taken on a real phone with its permi
 ---
 
 <div align="center">
-<h3><a href="https://ordersin.co/app">Try the live app &rarr;</a></h3>
+<h3><a href="https://ordersin.co/app">Open the live app &rarr;</a></h3>
+<p><sub>Invite-only beta &middot; the link is safe to click, sign-in needs a code</sub></p>
 <p><a href="https://ordersin.co">Product site</a></p>
 <p>Built and directed by <b>Nitin Rawal</b></p>
 </div>
